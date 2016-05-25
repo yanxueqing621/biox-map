@@ -16,7 +16,7 @@ BEGIN {
 }
 
 my @attrs = qw(
-  infile        indir         out_prefix
+  infile        indir         outfile
   mismatch      genome        tool
   bwa           soap          soap_index
   process_tool  process_sample
@@ -36,20 +36,22 @@ my $tmpdir = io->tmpdir;
 say $Bin;
 my $ref = io->file("$Bin/../share/data/ref.fa");
 my $fq = io->file("$Bin/../share/data/test.fq");
-my $out = io->catfile($tmpdir, 'test');
+my $outfile = io->catfile($tmpdir, 'test.sam');
 
 SKIP : {
   skip "$ref or $fq is not exist", 3  unless $ref->exists and $fq->exists;
-  say "ref:$ref\nfq:$fq\nout:$out\n";
+  say "ref:$ref\nfq:$fq\nout:$outfile\n";
   $ref->copy("$tmpdir");
   my $bm = new_ok($module => [
-      infile => "$fq",
-      genome => "$tmpdir/ref.fa",
-      out_prefix => "$out",
+      infile  => "$fq",
+      genome  => "$tmpdir/ref.fa",
+      outfile => "$outfile",
+      tool    => 'bwa',
     ]
   );
   is($bm->exist_index, 0, "exist_index");
   is($bm->create_index, 1, "create_index");
+  $bm->map;
   say Dumper $bm->statis_result;
 }
 
