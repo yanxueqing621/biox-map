@@ -109,7 +109,6 @@ path of genome file
 has genome => (
   is      => 'ro',
   isa     => Str,
-  require => 1,
 );
 
 =head2 tool
@@ -119,7 +118,7 @@ mapping software. Enum['bwa', 'soap']
 =cut
 
 has tool => (
-  is      => 'lazy',
+  is      => 'rw',
   isa     => Enum['bwa', 'soap'],
   default => "soap",
 );
@@ -184,8 +183,10 @@ has process_sample => (
   default => 1,
 );
 
-sub _build_out_prefix {
-  return io->catfile($ENV{PWD},  io(shift->infile)->filename)->name;
+sub _build_outfile {
+  my $self = shift;
+  my $infile = io($self->infile);
+  return $infile->exists ? io->catfile($ENV{PWD},  $infile->filename . "." . $_[0]->tool) : '';
 }
 
 =head2 exist_index
@@ -224,12 +225,14 @@ sub create_index {
   my ($soap, $bwa, $soap_index) = ($self->soap, $self->bwa, $self->soap_index);
   confess "$genome is not exist" unless -e $genome;
   my $genome_dir = io($genome)->filepath;
+  my $genome_name = io($genome)->filename;
   chdir("$genome_dir");
-  my @cmd = $tool eq 'soap' ? ($soap_index, $genome)
-          : $tool eq 'bwa'  ? ($bwa, 'index', '-a', 'bwtsw', '-p', "$genome.bwa",  "$genome")
+  my @cmd = $tool eq 'soap' ? ($soap_index, $genome_name)
+          : $tool eq 'bwa'  ? ($bwa, 'index', '-a', 'bwtsw', '-p', "$genome_name.bwa",  "$genome_name")
           :                   ();
   if (@cmd) {
     my ($in, $out, $err);
+    say join(" ", @cmd);
     run \@cmd, \$in, \$out, \$err or confess "cat $?: $err";
     chdir($ENV{'PWD'});
     return $self->exist_index ? 1 : 0;
@@ -280,7 +283,8 @@ process one or more samples
 sub map {
   my $self = shift;
   my ($infile, $indir, $outfile, $outdir) = ($self->infile, $self->indir, $self->outfile, $self->outdir);
-  my ($tool, $process_sample) = ($self->tool, $self->process_sample);
+  my ($genome, $tool, $process_sample) = ($self->genome, $self->tool, $self->process_sample);
+  confess "$genome is not exist" unless -e $genome;
   if ($indir) {
     my @fqs = io($indir)->filter(sub {$_->filename =~/fastq|fq$/})->all_files;
     return 0 if (@fqs);
@@ -309,16 +313,17 @@ statis mapping result
 sub statis_result {
   my ($self, $align_result) = @_;
   my ($tool, $outfile) = ($self->tool, $self->outfile);
-  $outfile = io($outfile)->chomp;
+  $outfile = $align_result || $outfile;
+  $outfile = io($outfile);
   confess "$outfile is not exist" unless $outfile->exists;
-  my $result = [$outfile->filename];
+  my @result = (0, 0, 0);
   if ($tool eq "soap") {
     while (defined (my $line = $outfile->getline)) {
       my @cols = split /\t/, $line;
       next unless $cols[3] == 1;
-      $result->[1]++ if ($cols[9] == 0);
-      $result->[2]++ if ($cols[9] =~/^[01]$/);
-      $result->[3]++ if ($cols[9] =~/^[012]$/);
+      $result[0]++ if ($cols[9] == 0);
+      $result[1]++ if ($cols[9] =~/^[01]$/);
+      $result[2]++ if ($cols[9] =~/^[012]$/);
     }
   } elsif ($tool eq 'bwa') {
     while (defined (my $line = $outfile->getline)) {
@@ -326,12 +331,12 @@ sub statis_result {
       next if $line =~/^@/;
       next if @cols == 11;
       next unless $cols[11] eq 'XT:A:U';
-      $result->[1]++ if ($cols[12] eq 'NM:i:0');
-      $result->[2]++ if ($cols[12] =~/NM:i:[01]/);
-      $result->[3]++ if ($cols[12] =~/NM:i:[012]/);
+      $result[0]++ if ($cols[12] eq 'NM:i:0');
+      $result[1]++ if ($cols[12] =~/NM:i:[01]/);
+      $result[2]++ if ($cols[12] =~/NM:i:[012]/);
     }
   }
-  return $result;
+  return \@result;
 }
 
 1;
