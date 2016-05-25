@@ -56,7 +56,7 @@ option soap_suffix => (
   doc       => "suffix of all samples' soap result",
 );
 
-=head2 bwa_suffx
+=head2 bwa_suffix
 
 suffix of all samples' bwa result
 
