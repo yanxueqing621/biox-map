@@ -139,6 +139,12 @@ option tool => (
   doc       => "mapping software",
 );
 
+=head2 execute
+
+=head2 BUILDARGS
+
+=cut
+
 sub execute {
   my ($self, $args_ref, $chain_ref) = @_;
   my $pre_message = "please input parameters, genome is required, either infile or indir is required";
