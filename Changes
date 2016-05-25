@@ -1,2 +1,19 @@
 Revision history for BioX-Map
 
+0.0.1 2016-05-25T11:48:05
+ [Yan Xueqing]
+ - Add some pod text to pass dzil test
+ - Remove some test
+ - Add execute file
+ - Add CLIS compare module
+ - Add pod text to pass dzil test
+ - Modified return value
+ - Add CLIS mapping module
+ - Add clis module
+ - Modified attribute
+ - Add outdir paramter and Fixed bwa run failure
+ - Add test data and mapping tool
+ - Add test file for BioX-Map
+ - Add biox-map module
+ - Initialize gitrepo with `dzil new`
+
