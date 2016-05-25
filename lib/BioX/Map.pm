@@ -3,7 +3,7 @@ use Modern::Perl;
 use IO::All;
 use Moo;
 use Carp qw/confess/;
-use Types::Standard qw/Str Int Enum/;
+use Types::Standard qw/Str Int Enum Bool/;
 use File::Which;
 use Cwd;
 use IPC::Run qw/run timeout/;
@@ -53,15 +53,39 @@ has indir => (
   isa     => Str,
 );
 
-=head2 out_prefix
+=head2 outfile
 
 path of outfile which could include path
 
 =cut
 
-has out_prefix => (
+has outfile => (
   is      => 'lazy',
   isa     => Str,
+);
+
+=head2 outdir
+
+outdir of mapping result
+
+=cut
+
+has outdir => (
+  is        => 'lazy',
+  isa       => Str,
+  default   => "./",
+);
+
+=head2 force_index
+
+index genome before mapping
+
+=cut
+
+has force_index => (
+  is      => 'lazy',
+  isa     => Bool,
+  default => 0,
 );
 
 =head2 mismatch
@@ -178,12 +202,11 @@ sub exist_index {
   my $flag = 1;
   if ($tool eq 'soap') {
     for my $suffix (@soap_suffix) {
-      $flag = 0 unless (-e "$genome.$suffix");
+      $flag = 0 unless (-e "$genome.index.$suffix");
     }
   } elsif ($tool eq 'bwa') {
     for my $suffix (@bwa_suffix) {
-      $flag = 0 unless (-e "$genome.$suffix");
-      $flag = 0 if (-e "$genome.rev.fmv");
+      $flag = 0 unless (-e "$genome.bwa.$suffix");
     }
   }
   return $flag;
@@ -203,13 +226,13 @@ sub create_index {
   my $genome_dir = io($genome)->filepath;
   chdir("$genome_dir");
   my @cmd = $tool eq 'soap' ? ($soap_index, $genome)
-          : $tool eq 'bwa'  ? ($bwa, 'index', '-a', 'bwtsw', '-p', "bwa_$genome",  "$genome")
+          : $tool eq 'bwa'  ? ($bwa, 'index', '-a', 'bwtsw', '-p', "$genome.bwa",  "$genome")
           :                   ();
   if (@cmd) {
     my ($in, $out, $err);
     run \@cmd, \$in, \$out, \$err or confess "cat $?: $err";
     chdir($ENV{'PWD'});
-    return $err ? 0 : 1;
+    return $self->exist_index ? 1 : 0;
   }
 }
 
@@ -220,51 +243,60 @@ wrap mapping software
 =cut
 
 sub _map_one {
-  my ($self, $infile, $out_prefix) = @_;
+  my ($self, $infile, $outfile) = @_;
+  $infile ||= $self->infile;
+  $outfile ||= $self->outfile;
+  say "infile:$infile. outfile:$outfile";
   my ($tool, $genome, $mismatch) = ($self->tool, $self->genome, $self->mismatch);
   my ($soap, $bwa, $process_tool) = ($self->soap, $self->bwa, $self->process_tool);
-  $self->create_index if ($self->exist_index);
+  $self->create_index if ($self->exist_index == 0 || $self->force_index);
   my $genome_index = $tool eq 'soap' ? "$genome.index"
-                   : $tool eq 'bwa'  ? "bwa_$genome"
+                   : $tool eq 'bwa'  ? "$genome.bwa"
                    :                   '';
   my ($in, $out, $err, @cmd);
   if ($tool eq 'soap') {
-    @cmd = ($soap, "-a", $infile, "-p", $process_tool, "-D", $genome_index, "-o", "$out_prefix.soap");
+    @cmd = ($soap, "-a", $infile, "-p", $process_tool, "-D", $genome_index, "-o", "$outfile");
+    say join(" ", @cmd);
     run \@cmd, \$in, \$out, \$err or confess "cat $?: $err";
     return $err ? 0 : 1;
   } elsif ($tool eq 'bwa') {
-    @cmd = ($bwa, "aln", "-n", $mismatch, "-t", $process_tool, $genome_index, ">", "$out_prefix.sai");
+    @cmd = ($bwa, "aln", "-n", $mismatch, "-t", $process_tool, "-f", "$outfile.sai", $genome_index, $infile);
+    say join(" ", @cmd);
     run \@cmd, \$in, \$out, \$err or confess "cat $?: $err";
-    return $err ? 0 : 1;
-    @cmd = ($bwa, "samse", "-f", "$out_prefix.bwa", $genome_index, "$out_prefix.sai", "$infile");
-    return $err ? 0 : 1;
+    #return $err ? 0 : 1;
+    @cmd = ($bwa, "samse", "-f", "$outfile", $genome_index, "$outfile.sai", "$infile");
+    say join(" ", @cmd);
+    run \@cmd, \$in, \$out, \$err or confess "cat $?: $err";
+    #return $err ? 0 : 1;
   }
 }
 
 =head2 map
 
-process one or more samples 
+process one or more samples
 
 =cut
 
 sub map {
   my $self = shift;
-  my ($infile, $indir, $out_prefix) = ($self->infile, $self->indir, $self->out_prefix);
+  my ($infile, $indir, $outfile, $outdir) = ($self->infile, $self->indir, $self->outfile, $self->outdir);
   my ($tool, $process_sample) = ($self->tool, $self->process_sample);
   if ($indir) {
     my @fqs = io($indir)->filter(sub {$_->filename =~/fastq|fq$/})->all_files;
     return 0 if (@fqs);
+    io($outdir)->mkpath unless -e $outdir;
     my $pm = Parallel::ForkManager->new($process_sample);
     DATA_LOOP:
     for my $fq (@fqs) {
       my $pid = $pm->start and next DATA_LOOP;
-      $self->_map_one($fq, $fq);
+      my $fq_name = $fq->filename;
+      $self->_map_one($fq, io->catfile($outdir, "$fq.$tool")->pathname);
       $pm->finish;
     }
     $pm->wait_all_children;
   } elsif ($infile) {
     confess "$infile is not exist" unless -e $infile;
-    $self->_map_one($infile, $out_prefix);
+    $self->_map_one;
   }
 }
 
@@ -276,11 +308,7 @@ statis mapping result
 
 sub statis_result {
   my ($self, $align_result) = @_;
-  my ($tool, $out_prefix) = ($self->tool, $self->out_prefix);
-  my $outfile = $align_result   ? $align_result
-              : $tool eq 'soap' ? "$out_prefix.soap"
-              : $tool eq 'bwa'  ? "$out_prefix.bwa"
-              :                   '';
+  my ($tool, $outfile) = ($self->tool, $self->outfile);
   $outfile = io($outfile)->chomp;
   confess "$outfile is not exist" unless $outfile->exists;
   my $result = [$outfile->filename];
@@ -298,7 +326,7 @@ sub statis_result {
       next if $line =~/^@/;
       next if @cols == 11;
       next unless $cols[11] eq 'XT:A:U';
-      $result->[1]++ if ($cols[12] == 'NM:i:0');
+      $result->[1]++ if ($cols[12] eq 'NM:i:0');
       $result->[2]++ if ($cols[12] =~/NM:i:[01]/);
       $result->[3]++ if ($cols[12] =~/NM:i:[012]/);
     }
