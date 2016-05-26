@@ -66,12 +66,12 @@ option indir => (
   format    => 's',
   short     => 'I',
   default   => '',
-  doc       => "path of one fastq file",
+  doc       => "path of indir include fastq file",
 );
 
 =head2 outdir
 
-output dir 
+output dir
 
 =cut
 
@@ -79,7 +79,7 @@ option outdir => (
   is        => 'ro',
   format    => 's',
   short     => 'O',
-  doc       => "path of one fastq file",
+  doc       => "path of outdir",
   default   => './',
 );
 
@@ -93,7 +93,7 @@ option process_tool => (
   is        => 'ro',
   format    => 'i',
   short     => 'p',
-  doc       => "path of outfile",
+  doc       => "cpu number used by mapping software",
   default   => 1,
 );
 
@@ -107,7 +107,7 @@ option process_sample => (
   is        => 'ro',
   format    => 'i',
   short     => 'P',
-  doc       => "path of outfile",
+  doc       => "number of samples running parallel",
   default   => 1,
 );
 

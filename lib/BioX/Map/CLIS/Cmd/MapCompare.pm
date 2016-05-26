@@ -39,12 +39,12 @@ option indir => (
   format    => 's',
   short     => 'i',
   default   => '',
-  doc       => "path of one fastq file",
+  doc       => "path of indir include fastq files",
 );
 
 =head2 outdir
 
-output dir 
+output dir
 
 =cut
 
@@ -52,7 +52,7 @@ option outdir => (
   is        => 'ro',
   format    => 's',
   short     => 'o',
-  doc       => "path of one fastq file",
+  doc       => "path of output dir include mapping result",
   default   => './',
 );
 
@@ -66,7 +66,7 @@ option summary_file => (
   is        => 'ro',
   format    => 's',
   short     => 's',
-  doc       => 'path of output file',
+  doc       => 'path of summary file',
   default   => "summary.txt",
 );
 
@@ -80,7 +80,7 @@ option process_tool => (
   is        => 'ro',
   format    => 'i',
   short     => 'p',
-  doc       => "path of outfile",
+  doc       => "cpu number used by soap or bwa",
   default   => 1,
 );
 
@@ -94,7 +94,7 @@ option process_sample => (
   is        => 'ro',
   format    => 'i',
   short     => 'P',
-  doc       => "path of outfile",
+  doc       => "number of samples running parallel",
   default   => 1,
 );
 
