@@ -54,6 +54,7 @@ option soap_suffix => (
   format    => 's',
   short     => 's',
   doc       => "suffix of all samples' soap result",
+  default   => 'soap',
 );
 
 =head2 bwa_suffix
@@ -67,6 +68,7 @@ option bwa_suffix => (
   format    => 's',
   short     => 'b',
   doc       => "suffix of all samples' bwa result",
+  default   => 'bwa',
 );
 
 =head2 outfile
@@ -95,6 +97,7 @@ sub execute {
   my ($indir, $outfile, $soap_suffix, $bwa_suffix) = ($self->indir, $self->outfile,  $self->soap_suffix, $self->bwa_suffix);
   $self->options_usage(1, $pre_message) unless ($outfile and $indir and $soap_suffix and $bwa_suffix);
   my $bm = BioX::Map->new;
+  say "indir:$indir";
   my @soap_result = io($indir)->filter( sub {$_->filename =~/\.$soap_suffix$/} )->all_files;
   my @bwa_result = io($indir)->filter( sub {$_->filename =~/\.$bwa_suffix$/} )->all_files;
   $outfile = io($outfile);
