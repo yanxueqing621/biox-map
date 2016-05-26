@@ -284,7 +284,6 @@ sub map {
   my $self = shift;
   my ($infile, $indir, $outfile, $outdir) = ($self->infile, $self->indir, $self->outfile, $self->outdir);
   my ($genome, $tool, $process_sample) = ($self->genome, $self->tool, $self->process_sample);
-  confess "$genome is not exist" unless -e $genome;
   if ($indir) {
     my @fqs = io($indir)->filter(sub {$_->filename =~/fastq|fq$/})->all_files;
     return 0 unless (@fqs);
