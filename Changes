@@ -1,6 +1,10 @@
 Revision history for BioX-Map
 
-0.0.9 2016-05-26T05:33:41
+0.0.10 2016-05-26T05:55:42
+ [Yan Xueqing]
+ - Fixed genome file not exist
+
+0.0.9 2016-05-26T05:33:41Z
  [Yan Xueqing]
  - Fixed parameter document
 
@@ -51,3 +55,4 @@ Revision history for BioX-Map
  - Add test file for BioX-Map
  - Add biox-map module
  - Initialize gitrepo with `dzil new`
+

@@ -4,7 +4,7 @@ BioX::Map - map read to genome with bwa and soap
 
 # VERSION
 
-version 0.0.9
+version 0.0.10
 
 # SYNOPSIS
 
@@ -95,7 +95,7 @@ statis mapping result
 
 # AUTHOR
 
-Yan Xueqing &lt;yanxueqing621@163.com>
+Yan Xueqing <yanxueqing621@163.com>
 
 # COPYRIGHT AND LICENSE
 
