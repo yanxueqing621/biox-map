@@ -108,8 +108,8 @@ option genome => (
   is        => 'ro',
   format    => 's',
   short     => 'g',
-  required  => 1,
   doc       => "path of genome file",
+  required  => 1,
 );
 
 =head2 tool
@@ -136,7 +136,7 @@ option tool => (
 
 sub execute {
   my ($self, $args_ref, $chain_ref) = @_;
-  my $pre_message = "please input parameters, genome is required, either infile or indir is required";
+  my $pre_message = "please input parameters, indir is required";
   my ($indir, $outdir) = ($self->indir, $self->outdir);
   $self->options_usage(1, $pre_message) unless ( $indir);
   my ($genome, $tool, $process_tool, $process_sample) = ($self->genome, $self->tool, $self->process_tool, $self->process_sample);
