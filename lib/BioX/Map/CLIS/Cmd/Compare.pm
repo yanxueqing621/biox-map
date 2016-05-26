@@ -104,6 +104,9 @@ sub execute {
   $outfile->print("samplename\tsoap0\tsoap1\tsoap2\tbwa0\tbwa1\tbwa2\n");
   for my $sr (@soap_result) {
     $bm->tool("soap");
+    my $filename = $sr->filename;
+    say "###########sr: $sr ######filename: $filename";
+    $filename =~s/\.$soap_suffix$//i;
     say "soap result:$sr";
     my $s_r = $bm->statis_result("$sr");
     $bm->tool("bwa");
@@ -111,7 +114,7 @@ sub execute {
     say "bwa result:$sr";
     my $b_r = $bm->statis_result("$sr");
     $sr =~s/\.$bwa_suffix//i;
-    $outfile->println(join "\t", "$sr", @$s_r, @$b_r);
+    $outfile->println(join "\t", $filename, @$s_r, @$b_r);
   }
 }
 
