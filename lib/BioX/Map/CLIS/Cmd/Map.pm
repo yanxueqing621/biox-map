@@ -38,6 +38,7 @@ option infile => (
   format    => 's',
   short     => 'i',
   doc       => "path of one fastq file",
+  default   => '',
 );
 
 =head2 outfile
@@ -51,6 +52,7 @@ option outfile => (
   format    => 's',
   short     => 'o',
   doc       => "path of outfile",
+  default   => '',
 );
 
 =head2 indir
