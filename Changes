@@ -1,7 +1,18 @@
 Revision history for BioX-Map
 
-0.0.1 2016-05-25T11:48:05
+0.0.2 2016-05-26T02:27:46
  [Yan Xueqing]
+ - Add another test fq file
+ - Modified error information
+ - Remove path of samplename in summary file
+ - Add '' for infile and outfile parameter
+ - Fixed output path error and fastq file check error
+ - Add MapCompare module
+ - Add default suffix for bwa and soap
+
+0.0.1 2016-05-25T11:48:08
+ [Yan Xueqing]
+ - Auto commited by dzil with version 0.0.1 at 25-May-2016
  - Add some pod text to pass dzil test
  - Remove some test
  - Add execute file
