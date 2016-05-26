@@ -4,7 +4,7 @@ BioX::Map - map read to genome with bwa and soap
 
 # VERSION
 
-version 0.0.7
+version 0.0.8
 
 # SYNOPSIS
 
