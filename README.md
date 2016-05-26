@@ -1,97 +1,19 @@
 # NAME
 
-BioX::Map - map read to genome with bwa and soap
+BioX::Map::CLIS - a mapping toolkit
 
 # VERSION
 
-version 0.0.5
-
-# SYNOPSIS
-
-    use BioX::Map;
-    my $bm = BioX::Map->new(
-      infile      => "in.fastq",
-      out_prefix  => 'out',
-      genome      => 'ref.fa',
-    );
+version 0.0.6
 
 # DESCRIPTION
 
-This module aim to wrap bwa and soap, and statistic result
+# SYNOPOSIS
 
-# Attributes
+    use BioX::Map::CLIS;
+    BioX::Map::CLIS->new_with_cmd;
 
-## infile
-
-the fastq file
-
-## indir
-
-The dir that include fastq file. The priority is higher than infile
-
-## outfile
-
-path of outfile which could include path
-
-## outdir
-
-outdir of mapping result
-
-## force\_index
-
-index genome before mapping
-
-## mismatch
-
-set mismatch allowed in mapping
-
-## genome
-
-path of genome file
-
-## tool
-
-mapping software. Enum\['bwa', 'soap'\]
-
-## bwa
-
-path of bwa
-
-## soap
-
-path of soap
-
-## soap\_index
-
-path of 2bwt-builder
-
-## process\_tool
-
-process of mapping software
-
-## process\_sample
-
-how many samples are processed parallel
-
-## exist\_index
-
-check whether genome index exists
-
-## create\_index
-
-create genome index before mapping
-
-## \_map\_one
-
-wrap mapping software
-
-## map
-
-process one or more samples
-
-## statis\_result
-
-statis mapping result
+## execute
 
 # AUTHOR
 
