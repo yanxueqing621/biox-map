@@ -149,6 +149,7 @@ option tool => (
 
 sub execute {
   my ($self, $args_ref, $chain_ref) = @_;
+  my $stamp = time;
   my $pre_message = "please input parameters, genome is required, either infile or indir is required";
   my ($infile, $indir, $outfile, $outdir) = ($self->infile, $self->indir, $self->outfile, $self->outdir);
   $self->options_usage(1, $pre_message) unless ($infile or $indir);
@@ -164,6 +165,8 @@ sub execute {
     process_sample  => $process_sample,
   );
   $bm->map;
+  my $m = time - $stamp;
+  say "duration second:" . (time - $stamp) . "\nduration minute:" . (int($m/60));
 }
 
 1;

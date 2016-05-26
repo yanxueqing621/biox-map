@@ -136,6 +136,7 @@ option tool => (
 
 sub execute {
   my ($self, $args_ref, $chain_ref) = @_;
+  my $stamp = time;
   my $pre_message = "please input parameters, indir is required";
   my ($indir, $outdir) = ($self->indir, $self->outdir);
   $self->options_usage(1, $pre_message) unless ( $indir);
@@ -153,6 +154,8 @@ sub execute {
   $bm->map;
   my $summary = $self->summary_file;
   system("biox-map compare -i $outdir -o $summary -s soap -b bwa");
+  my $m = time - $stamp;
+  say "duration second" . (time - $stamp) . "\nduration minute" . (int ($m / 60));
 }
 
 1;
