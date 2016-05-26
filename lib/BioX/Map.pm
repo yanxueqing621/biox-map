@@ -287,14 +287,14 @@ sub map {
   confess "$genome is not exist" unless -e $genome;
   if ($indir) {
     my @fqs = io($indir)->filter(sub {$_->filename =~/fastq|fq$/})->all_files;
-    return 0 if (@fqs);
+    return 0 unless (@fqs);
     io($outdir)->mkpath unless -e $outdir;
     my $pm = Parallel::ForkManager->new($process_sample);
     DATA_LOOP:
     for my $fq (@fqs) {
       my $pid = $pm->start and next DATA_LOOP;
       my $fq_name = $fq->filename;
-      $self->_map_one($fq, io->catfile($outdir, "$fq.$tool")->pathname);
+      $self->_map_one($fq, io->catfile($outdir, "$fq_name.$tool")->pathname);
       $pm->finish;
     }
     $pm->wait_all_children;
