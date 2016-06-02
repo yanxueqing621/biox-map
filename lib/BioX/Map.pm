@@ -189,6 +189,8 @@ sub _build_outfile {
   return $infile->exists ? io->catfile($ENV{PWD},  $infile->filename . "." . $_[0]->tool) : '';
 }
 
+=head1 METHODS
+
 =head2 exist_index
 
 check whether genome index exists
@@ -285,7 +287,7 @@ sub map {
   my ($infile, $indir, $outfile, $outdir) = ($self->infile, $self->indir, $self->outfile, $self->outdir);
   my ($genome, $tool, $process_sample) = ($self->genome, $self->tool, $self->process_sample);
   if ($indir) {
-    my @fqs = io($indir)->filter(sub {$_->filename =~/fastq|fq$/})->all_files;
+    my @fqs = io($indir)->filter(sub {$_->filename =~/fastq|fq|fastq\.gz|fq\.gz$/})->all_files;
     return 0 unless (@fqs);
     io($outdir)->mkpath unless -e $outdir;
     my $pm = Parallel::ForkManager->new($process_sample);
