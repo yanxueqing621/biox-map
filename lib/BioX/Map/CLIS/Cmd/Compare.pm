@@ -7,6 +7,7 @@ use MooX::Options prefer_commandline => 1, with_config_from_file => 1;
 use MooX::Cmd;
 use BioX::Map;
 use Types::Standard qw(Int Str Bool Enum);
+use Parallel::ForkManager;
 
 # VERSION:
 # ABSTRACT: a wrapper for mapping software
@@ -71,6 +72,21 @@ option bwa_suffix => (
   default   => 'bwa',
 );
 
+=head2 process
+
+number of process will be used
+
+=cut
+
+option process => (
+  is      => 'ro',
+  format  => 's',
+  short   => 'p',
+  doc     => 'number of process will be used',
+  default => 2,
+
+);
+
 =head2 outfile
 
 summary file
@@ -102,7 +118,10 @@ sub execute {
   my @bwa_result = io($indir)->filter( sub {$_->filename =~/\.$bwa_suffix$/} )->all_files;
   $outfile = io($outfile);
   $outfile->print("samplename\tsoap0\tsoap1\tsoap2\tbwa0\tbwa1\tbwa2\n");
+  my $pm = Parallel::ForkManager->new($self->process);
+  DATA_LOOP:
   for my $sr (@soap_result) {
+    my $pid = $pm->start and next DATA_LOOP;
     $bm->tool("soap");
     my $filename = $sr->filename;
     say "###########sr: $sr ######filename: $filename";
@@ -114,8 +133,10 @@ sub execute {
     say "bwa result:$sr";
     my $b_r = $bm->statis_result("$sr");
     $sr =~s/\.$bwa_suffix//i;
-    $outfile->println(join "\t", $filename, @$s_r, @$b_r);
+    $outfile->lock->println(join "\t", $filename, @$s_r, @$b_r)->unlock;
+    $pm->finish;
   }
+  $pm->wait_all_children;
 }
 
 1;
