@@ -1,6 +1,14 @@
 Revision history for BioX-Map
 
-0.0.11 2016-06-03T03:32:15
+0.0.12 2016-06-03T03:43:45
+ [Yan Xueqing]
+ - Add parallel support for compare app
+ - Auto commited by dzil with version 0.0.11 at 03-Jun-2016
+ - Add support for fastq.gz and fq.gz
+ - Auto commited by dzil with version 0.0.10 at 26-May-2016
+ - Fixed genome file not exist
+
+0.0.11 2016-06-03T03:32:15Z
  [Yan Xueqing]
  - Add support for fastq.gz and fq.gz
  - Auto commited by dzil with version 0.0.10 at 26-May-2016
