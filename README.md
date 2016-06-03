@@ -4,7 +4,7 @@ BioX::Map - map read to genome with bwa and soap
 
 # VERSION
 
-version 0.0.10
+version 0.0.11
 
 # SYNOPSIS
 
@@ -72,6 +72,8 @@ process of mapping software
 ## process\_sample
 
 how many samples are processed parallel
+
+# METHODS
 
 ## exist\_index
 
